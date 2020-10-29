@@ -1,6 +1,7 @@
 from math import inf
+import time
 
-from structure import RouteMap
+from structure import RouteMap, Visualizer
 
 def dijsktra(network, start, end):
     '''
@@ -24,16 +25,24 @@ def dijsktra(network, start, end):
         current = choose_smallest(distance, visited)
         neighbors = graph[current]
         for neighbor in neighbors:
+            # if that neighbor is visited, we cannot find a shorter route
             if neighbor in visited:
                 continue
+            # update the shortest distance and its parent node if we find a shorter route
             if distance[neighbor] > distance[current] + weight[(current, neighbor)]:
                 distance[neighbor] = distance[current] + weight[(current, neighbor)]
                 parent[neighbor] = current
+        # mark current node as visited
         visited.append(current)
-    pa = parent[end]
-    while pa != '':
-        print(pa)
-        pa = parent[pa]
+    # form the shortest route
+    path = []
+    current = end
+    last = parent[current]
+    while last != '':
+        path.append((current, last))
+        current = last
+        last = parent[current]
+    return path
     
 def choose_smallest(distance, visited):
     '''
@@ -49,6 +58,7 @@ def choose_smallest(distance, visited):
     return ret
 
 if __name__ == '__main__':
+    # do testing
     network = RouteMap()
     network.add_edge('A', 'B', 2)
     network.add_edge('A', 'C', 4)
@@ -62,5 +72,8 @@ if __name__ == '__main__':
     network.add_edge('D', 'G', 6)
     network.add_edge('E', 'G', 7)
     network.add_edge('F', 'G', 6)
-
-    dijsktra(network, 'A', 'G')
+    vis = Visualizer(network)
+    vis.draw()
+    shortest_path = dijsktra(network, 'A', 'G')
+    vis.highlight_edge(*shortest_path)
+    input('test> ')

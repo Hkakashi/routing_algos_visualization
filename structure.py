@@ -20,6 +20,7 @@ class RouteMap:
         router1, router2: str
         weight: int
         '''
+        weight = int(weight)
         self.graph[router1].append(router2)
         self.graph[router2].append(router1)
         self.weight[(router1, router2)] = weight
@@ -41,19 +42,23 @@ class Visualizer:
                 self.network.add_edge(node, neighbor, weight=wei, color='grey')
     
     def draw(self):
+        # draw the network
         fig, ax = plt.subplots()
+        plt.ion()
         self.pos = nx.circular_layout(self.network)
         nx.draw(self.network, pos=self.pos, ax=ax, with_labels=True) # show node label
         labels = nx.get_edge_attributes(self.network,'weight')
         nx.draw_networkx_edge_labels(self.network, pos=self.pos, edge_labels=labels)
         plt.show()
 
-    def highlight_edge(self, *args):
+    def highlight_edge(self, *args, color='r'):
+        '''
+        highlight edges in red
+        args = [(router1, router2), (..., ...), ...]
+        '''
         fig, ax = plt.subplots()
         nx.draw(self.network, pos=self.pos, ax=ax, with_labels=True) # show node label
-        path = nx.shortest_path(self.network,source='A',target='G')
-        path_edges = set(zip(path,path[1:]))
-        nx.draw_networkx_edges(self.network, self.pos, edgelist=path_edges, edge_color='r')
+        nx.draw_networkx_edges(self.network, self.pos, edgelist=args, edge_color=color, width=2)
         labels = nx.get_edge_attributes(self.network,'weight')
         nx.draw_networkx_edge_labels(self.network, pos=self.pos, edge_labels=labels)
         plt.show()
@@ -73,7 +78,6 @@ if __name__ == '__main__':
     network.add_edge('D', 'G', 6)
     network.add_edge('E', 'G', 7)
     network.add_edge('F', 'G', 6)
-    print(network)
     vis = Visualizer(network)
     vis.draw()
-    vis.highlight_edge()
+    vis.highlight_edge(('A', 'B'), ('A', 'C'))
